@@ -1,0 +1,8 @@
+update loco set train=0 where train=1
+update loco set train=1 where node=0
+
+update loco set train=0 where train =2
+update loco set train = 2 where node =2
+
+update loco set train=0 where train =3
+update loco set train = 3 where node =4
