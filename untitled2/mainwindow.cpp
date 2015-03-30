@@ -15,8 +15,6 @@
 #include <QtSql>
 #include <QMessageBox>
 
-//#include <qr
-//#include <QColor
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -29,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dbErr = new QMessageBox;
     newdb = new QDialog;
     scene = new QGraphicsScene(this);
+
 
     QPen  path1(Qt::black);
     pointblue.setColor("blue");

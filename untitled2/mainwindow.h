@@ -42,6 +42,7 @@ private:
     QLineEdit* newName;
     QPushButton* submit;
     QLabel* errLabel;
+    QBoxLayout* mainLayout;
 
     //
     QLabel label;
