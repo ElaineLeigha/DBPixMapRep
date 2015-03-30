@@ -90,6 +90,7 @@ public slots:
     void createDummyDatabase();
     void setdatabars();
     void RxTxDatabases();
+    void setDB();
 
 signals:
 

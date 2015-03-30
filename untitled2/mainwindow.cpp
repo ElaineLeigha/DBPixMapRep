@@ -131,8 +131,13 @@ void MainWindow::setdatabars()
     filemenu->addAction(quit);
     optionsmenu->addAction(dbselect);
     connect(quit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(dbselect, SIGNAL(triggered()), this, SLOT(setDB()));
 }
 
+void MainWindow::setDB()
+{
+
+}
 
 //*************SQL INTERACTION***************************************************
 
