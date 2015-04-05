@@ -27,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     dbErr = new QMessageBox;
     newdb = new QDialog;
     scene = new QGraphicsScene(this);
+    ui->powerBox->setMaxCount(128);
+    ui->powerBox->setInsertPolicy(QComboBox::InsertAtBottom);
 
 
     QPen  path1(Qt::black);
@@ -68,7 +70,9 @@ MainWindow::MainWindow(QWidget *parent) :
   //*****************************************************************************
 //     connect(ui->sendButtonTrain, SIGNAL(clicked()), this, SLOT(sendinfotrain()));
      connect(ui->sendButtonTrack, SIGNAL(clicked()), this, SLOT(sendinfotrack()));
-     connect(ui->pushButton_3,SIGNAL(clicked()),this,SLOT(sendinfoRoutes()));
+     connect(ui->pushButton_3, SIGNAL(clicked()), this, SLOT(sendinfoRoutes()));
+     connect(ui->offbutton, SIGNAL(clicked()), this, SLOT(turnoffsection()));
+     connect(ui->onbutton, SIGNAL(clicked()), this, SLOT(turnonsection()));
 }
 
 MainWindow::~MainWindow()
@@ -135,7 +139,19 @@ void MainWindow::setdatabars()
 
 void MainWindow::setDB()
 {
+    newdb->setGeometry(600,300,200,200);
+    QLabel* choiceLabel = new QLabel("Please select version");
+    QComboBox* localORnetwork = new QComboBox();
+    QPushButton* select = new QPushButton("Continue");
+    QVBoxLayout* dbSelectLayout = new QVBoxLayout(newdb);
 
+    localORnetwork->insertItem(1, "Local");
+    localORnetwork->insertItem(2, "Network");
+
+    dbSelectLayout->addWidget(choiceLabel);
+    dbSelectLayout->addWidget(localORnetwork);
+    dbSelectLayout->addWidget(select);
+    newdb->show();
 }
 
 //*************SQL INTERACTION***************************************************
@@ -171,7 +187,6 @@ void MainWindow::RxTxDatabases()
 
 void MainWindow::sendinfotrack()
 {
-
     QSqlDatabase team4db = QSqlDatabase::addDatabase("QMYSQL");
     team4db.setHostName("pavelow.eng.uah.edu");
     team4db.setPort(33158);
@@ -194,12 +209,20 @@ void MainWindow::sendinfotrack()
     while(q.next())
     {
         DS[i] = q.value(0).toString();  //assign the name of the detection section to an array variable
+        if(ui->powerBox->findText(DS[i]) == -1)
+        {
+            if(ui->powerBox->currentText() != DS[i] || ui->powerBox->count() ==0)
+            {
+                ui->powerBox->addItem(DS[i]);
+            }
+        }
         qDebug() << q.value(0).toString();
         i++;
     }
-
+    scene->clear();
     for(p = 0; p < i; p ++)// i at this point is the number of detection sections available
     {
+        DSections[p] = new QGraphicsItemGroup;
         q.prepare("select X,Y from " + DS[p]); //one table at a time
         q.exec("select X,Y from " + DS[p]);
         qDebug() << "default select: " << "select X,Y, from " << DS[p] << endl;
@@ -214,31 +237,25 @@ void MainWindow::sendinfotrack()
         }
         for(int k = m; k < j -1; k++)
         {
-            lines[k].setLine(drawLines[k].x, drawLines[k].y, drawLines[k+1].x, drawLines[k+1].y);
-            scene->addLine(lines[k]);
+            lines[k] = new QGraphicsLineItem;
+            lines[k]->setLine(drawLines[k].x, drawLines[k].y, drawLines[k+1].x, drawLines[k+1].y);
+            DSections[p]->addToGroup(lines[k]); // group items together to identify them better for coloring on or off
         }
+        DSections[p]->setToolTip(DS[p]);    //Display on the graphic scene
+        scene->addItem(DSections[p]);
+
         m = j;
     }
+
 //****************************Show powered off sections********************
-//    q.exec("select Block from team2 where Power = 0");
-//    j = 0;
-//    m=0;
-//    while(q.next())
-//    {
-//        qDebug() << q.value(0).toString();
-//        for(i = 0; i<18; i++)
-//        {
-//            if(q.value(0).toString() == drawLines[i].dsname)
-//            {
-//                for(int k = m; k < j -1; k++)
-//                {
-//                    scene->addLine(lines[k], QPen::setColor(red);
-//                }
-//                m = j;
-//            }
-//            j++;
-//        }
-//    }
+ /*   q.exec("select Block from team2 where Power = 0");
+    j = 0;
+    m=0;
+    while(q.next())
+    {
+
+    }
+    */
 
 
     qDebug() << endl;
@@ -247,7 +264,48 @@ void MainWindow::sendinfotrack()
 }
 
 
-//************FAKE DATA**********************************************************
+
+void MainWindow::turnoffsection()
+{
+    if(ui->powerBox->count() > 0)
+    {
+        for(int i = 0; i < 128; i++)
+        {
+            if(DS[i] == ui->powerBox->currentText())
+            {
+                DSections[i]->setOpacity(0.1);
+            }
+        }
+        scene->update();
+    }
+}
+
+
+void MainWindow::turnonsection()
+{
+    if(ui->powerBox->count() > 0)
+    {
+        for(int i = 0; i < 128; i++)
+        {
+            if(DS[i] == ui->powerBox->currentText())
+            {
+                DSections[i]->setOpacity(1.0);
+            }
+        }
+        scene->update();
+    }
+}
+
+//************manual DATA**********************************************************
+
+
+void MainWindow::testDraw()
+{
+        QGraphicsLineItem* newline = new QGraphicsLineItem;
+        newline->setLine(0,0,30,0);
+        newline->setToolTip("newline");
+        scene->addItem(newline);
+}
 
 
 
@@ -318,6 +376,7 @@ void MainWindow::sendinfotrainDUM()
     ui->lineEdit->clear();
 }
 
+
 void MainWindow::sendinfotrackDUM()
 {
     QSqlQuery q;
@@ -347,7 +406,6 @@ void MainWindow::sendinfotrackDUM()
     scene->update();
     ui->lineEdit->clear();
 }
-
 
 void MainWindow::createDummyDatabase()
 {
@@ -486,7 +544,6 @@ void MainWindow::createDummyDatabase()
 //     q.exec("INSERT INTO track VALUES(119, 1082,555,518,492)");
 
 }
-
 
 void MainWindow::sendinfoRoutes()
 {

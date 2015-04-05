@@ -52,7 +52,8 @@ private:
     QGraphicsLineItem *Node3 = NULL;
     QMessageBox* dbErr;
     QDialog* newdb;
-    QLineF lines[1000];
+    QGraphicsLineItem* myline[100000] = {NULL};
+     QGraphicsLineItem* lines[100000] = {NULL};
 
     QTimer* timer;
     QTimer* testtimer;
@@ -67,7 +68,10 @@ private:
 
     //SQL Members
       QGraphicsLineItem *l[400];
+
       QString DS[128] = {NULL};
+      QGraphicsItemGroup * DSections[128];
+
       struct XY{
           QString dsname;
           int x;
@@ -92,7 +96,10 @@ public slots:
     void setdatabars();
     void RxTxDatabases();
     void setDB();
+    void testDraw();
 
+    void turnoffsection();
+    void turnonsection();
 signals:
 
 };
