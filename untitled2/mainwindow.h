@@ -76,7 +76,7 @@ private:
           QString dsname;
           int x;
           int y;
-      } drawLines[500];
+      } point[50000];
       QPen redPen;
       QPen bluePen;
       QPen greenPen;

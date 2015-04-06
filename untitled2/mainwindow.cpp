@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     redPen.setColor(Qt::red);
     redPen.setWidth(5);
     bluePen.setColor(Qt::blue);
-    bluePen.setWidth(5);
+    bluePen.setWidth(7);
     greenPen.setColor(Qt::green);
     greenPen.setWidth(5);
 
@@ -242,21 +242,21 @@ void MainWindow::sendinfotrack()
 
         while(q.next())
         {
-            drawLines[j].x = q.value(0).toInt() * 10; //scale factor
-            drawLines[j].y = q.value(1).toInt() * 10;
-            drawLines[j].dsname = DS[p];
-//            qDebug() << q.value(0).toInt() << q.value(1).toInt() << DS[p];
+            point[j].x = q.value(0).toInt() * 10; //scale factor
+            point[j].y = q.value(1).toInt() * 10;
+            point[j].dsname = DS[p];
             j++;
         }
-        int jay = floor(j/2);
         //Determine train display points
-        midpoint[p].setX(drawLines[jay].x);
-        midpoint[p].setY(drawLines[jay].y);
+        int jay = floor(j/2);
+        midpoint[p].setX(point[jay].x);
+        midpoint[p].setY(point[jay].y);
+        scene->addLine( midpoint[p].x(), midpoint[p].y(),midpoint[p].x(),midpoint[p].y(), bluePen);
 
         for(int k = m; k < j -1; k++)
         {
             lines[k] = new QGraphicsLineItem;
-            lines[k]->setLine(drawLines[k].x, drawLines[k].y, drawLines[k+1].x, drawLines[k+1].y);
+            lines[k]->setLine(point[k].x, point[k].y, point[k+1].x, point[k+1].y);
             if(p == 1) lines[k]->setPen(redPen);
             else lines[k]->setPen(greenPen);
             lines[k]->setToolTip(DS[p]);    //Display on the graphic scene
@@ -300,6 +300,8 @@ void MainWindow::deactivate(QString section)
     scene->update();
 }
 
+//Manually turn off and on a section of track from
+//a combo box of displayed sections
 void MainWindow::turnoffsection()
 {
     if(ui->powerBox->count() > 0)
