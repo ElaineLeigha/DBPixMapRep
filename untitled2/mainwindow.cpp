@@ -14,6 +14,7 @@
 #include <QMouseEvent>
 #include <QtSql>
 #include <QMessageBox>
+#include <qmath.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -24,12 +25,18 @@ MainWindow::MainWindow(QWidget *parent) :
     RxTxDatabases();
     setdatabars();
 
+
     dbErr = new QMessageBox;
     newdb = new QDialog;
     scene = new QGraphicsScene(this);
     ui->powerBox->setMaxCount(128);
     ui->powerBox->setInsertPolicy(QComboBox::InsertAtBottom);
-
+    redPen.setColor(Qt::red);
+    redPen.setWidth(5);
+    bluePen.setColor(Qt::blue);
+    bluePen.setWidth(5);
+    greenPen.setColor(Qt::green);
+    greenPen.setWidth(5);
 
     QPen  path1(Qt::black);
     pointblue.setColor("blue");
@@ -152,6 +159,8 @@ void MainWindow::setDB()
     dbSelectLayout->addWidget(localORnetwork);
     dbSelectLayout->addWidget(select);
     newdb->show();
+    //need to integrate both versions of program
+    //need to assign connect functions in here for which dbs to use
 }
 
 //*************SQL INTERACTION***************************************************
@@ -185,6 +194,10 @@ void MainWindow::RxTxDatabases()
 
 }
 
+//Reads from team 4 DS tables and draw
+//Assigns ds names to each block of track
+//Will need to add team 1 info to associate colors
+//of predicted path.
 void MainWindow::sendinfotrack()
 {
     QSqlDatabase team4db = QSqlDatabase::addDatabase("QMYSQL");
@@ -232,16 +245,23 @@ void MainWindow::sendinfotrack()
             drawLines[j].x = q.value(0).toInt() * 10; //scale factor
             drawLines[j].y = q.value(1).toInt() * 10;
             drawLines[j].dsname = DS[p];
-            qDebug() << q.value(0).toInt() << q.value(1).toInt() << DS[p];
+//            qDebug() << q.value(0).toInt() << q.value(1).toInt() << DS[p];
             j++;
         }
+        int jay = floor(j/2);
+        //Determine train display points
+        midpoint[p].setX(drawLines[jay].x);
+        midpoint[p].setY(drawLines[jay].y);
+
         for(int k = m; k < j -1; k++)
         {
             lines[k] = new QGraphicsLineItem;
             lines[k]->setLine(drawLines[k].x, drawLines[k].y, drawLines[k+1].x, drawLines[k+1].y);
+            if(p == 1) lines[k]->setPen(redPen);
+            else lines[k]->setPen(greenPen);
+            lines[k]->setToolTip(DS[p]);    //Display on the graphic scene
             DSections[p]->addToGroup(lines[k]); // group items together to identify them better for coloring on or off
         }
-        DSections[p]->setToolTip(DS[p]);    //Display on the graphic scene
         scene->addItem(DSections[p]);
 
         m = j;
@@ -249,11 +269,9 @@ void MainWindow::sendinfotrack()
 
 //****************************Show powered off sections********************
  /*   q.exec("select Block from team2 where Power = 0");
-    j = 0;
-    m=0;
     while(q.next())
     {
-
+        deactivate(q.value(0).toString());
     }
     */
 
@@ -264,6 +282,23 @@ void MainWindow::sendinfotrack()
 }
 
 
+//Use for team 2 integration
+//Only need a deactivate function because when
+//put on a timer and constantly reading from the database
+//it redraws the track each 2 seconds. If it's still turned
+//off, then it will re-enter this function and set opacity
+//back to display that the piece of track is off
+void MainWindow::deactivate(QString section)
+{
+    for(int i = 0; i < 128; i++)
+    {
+        if(DS[i] == section)
+        {
+            DSections[i]->setOpacity(0.1);
+        }
+    }
+    scene->update();
+}
 
 void MainWindow::turnoffsection()
 {
@@ -279,8 +314,6 @@ void MainWindow::turnoffsection()
         scene->update();
     }
 }
-
-
 void MainWindow::turnonsection()
 {
     if(ui->powerBox->count() > 0)
@@ -297,16 +330,6 @@ void MainWindow::turnonsection()
 }
 
 //************manual DATA**********************************************************
-
-
-void MainWindow::testDraw()
-{
-        QGraphicsLineItem* newline = new QGraphicsLineItem;
-        newline->setLine(0,0,30,0);
-        newline->setToolTip("newline");
-        scene->addItem(newline);
-}
-
 
 
 void MainWindow::sendinfotrainDUM()
@@ -406,6 +429,7 @@ void MainWindow::sendinfotrackDUM()
     scene->update();
     ui->lineEdit->clear();
 }
+
 
 void MainWindow::createDummyDatabase()
 {

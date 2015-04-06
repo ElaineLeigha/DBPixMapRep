@@ -77,6 +77,10 @@ private:
           int x;
           int y;
       } drawLines[500];
+      QPen redPen;
+      QPen bluePen;
+      QPen greenPen;
+      QPoint midpoint[128];
 
 
 
@@ -96,10 +100,10 @@ public slots:
     void setdatabars();
     void RxTxDatabases();
     void setDB();
-    void testDraw();
 
     void turnoffsection();
     void turnonsection();
+    void deactivate(QString section);
 signals:
 
 };
