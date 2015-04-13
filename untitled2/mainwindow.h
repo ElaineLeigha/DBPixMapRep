@@ -56,7 +56,7 @@ private:
      QGraphicsLineItem* lines[100000] = {NULL};
 
      QLabel* choiceLabel;
-     QComboBox* localORnetwork;
+     QComboBox* StandaloneORInteroperability;
      QPushButton* select;
      QVBoxLayout* dbSelectLayout;
 
@@ -97,13 +97,15 @@ public slots:
     void createDummyDatabase();
     void setdatabars();
     void RxTxDatabases();
-    void setDB();
+
+    void setDBdialog();
     void selectdb();
 
     void turnoffsection();
     void turnonsection();
     void deactivate(QString section);
     void sendinfotrain();
+
 signals:
 
 };

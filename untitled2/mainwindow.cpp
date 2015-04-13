@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setWindowOpacity(0.8);
     createDummyDatabase();
     RxTxDatabases();
     setdatabars();
@@ -36,7 +37,8 @@ MainWindow::MainWindow(QWidget *parent) :
     newdb = new QDialog;
     scene = new QGraphicsScene(this);
 
-    setDB();
+    newdb->setModal(true);
+    setDBdialog();
 
     ui->powerBox->setMaxCount(128);
     ui->powerBox->setInsertPolicy(QComboBox::InsertAtBottom);
@@ -128,23 +130,23 @@ void MainWindow::setdatabars()
     filemenu->addAction(quit);
     optionsmenu->addAction(dbselect);
     connect(quit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(dbselect, SIGNAL(triggered()), this, SLOT(setDB()));
+    connect(dbselect, SIGNAL(triggered()), this, SLOT(setDBdialog()));
 }
 
-void MainWindow::setDB()
+void MainWindow::setDBdialog()
 {
-    newdb->setGeometry(600,300,150,150);
+    newdb->setGeometry(600,300,250,150);
     newdb->setWindowTitle("Database Selection");
     choiceLabel = new QLabel("Please select version");
-    localORnetwork = new QComboBox();
+    StandaloneORInteroperability = new QComboBox();
     select = new QPushButton("Continue");
     dbSelectLayout = new QVBoxLayout(newdb);
-    localORnetwork->insertItem(1, "Local");
-    localORnetwork->insertItem(2, "Network");
+    StandaloneORInteroperability->insertItem(1, "Interoperability");
+    StandaloneORInteroperability->insertItem(2, "Standalone");
 
     dbSelectLayout->addWidget(choiceLabel);
     dbSelectLayout->setAlignment(choiceLabel, Qt::AlignHCenter);
-    dbSelectLayout->addWidget(localORnetwork);
+    dbSelectLayout->addWidget(StandaloneORInteroperability);
     dbSelectLayout->addWidget(select);
     newdb->show();
 }
@@ -154,17 +156,16 @@ void MainWindow::setDB()
 void MainWindow::selectdb()
 {
 
-    choice = localORnetwork->currentText();
-    if(choice == "Network")
+    choice = StandaloneORInteroperability->currentText();
+    if(choice == "Interoperability")
     {
         connect(ui->sendButtonTrack, SIGNAL(clicked()), this, SLOT(sendinfotrack()));
         connect(ui->sendButtonTrain, SIGNAL(clicked()), this, SLOT(sendinfotrain()));
         connect(ui->pushButton_3, SIGNAL(clicked()), this, SLOT(sendinfoRoutes()));
         connect(ui->offbutton, SIGNAL(clicked()), this, SLOT(turnoffsection()));
         connect(ui->onbutton, SIGNAL(clicked()), this, SLOT(turnonsection()));
-        ui->lineEdit->hide();
     }
-    else if(choice == "Local")
+    else if(choice == "Standalone")
     {
         connect(ui->sendButtonTrack, SIGNAL(clicked()), this, SLOT(sendinfotrackDUM()));
         connect(ui->pushButton_3, SIGNAL(clicked()), this, SLOT(sendinfoRoutes()));
@@ -173,6 +174,7 @@ void MainWindow::selectdb()
         ui->onbutton->hide();
         ui->offbutton->hide();
     }
+    this->setWindowOpacity(1.0);
     newdb->close();
 }
 
@@ -295,7 +297,6 @@ void MainWindow::sendinfotrack()
 
 void MainWindow::sendinfotrain()
 {
-
     QSqlDatabase t4adb = QSqlDatabase::addDatabase("QMYSQL");
     t4adb.setHostName("pavelow.eng.uah.edu");
     t4adb.setPort(33152);
@@ -316,8 +317,17 @@ void MainWindow::sendinfotrain()
     QSqlQuery q;
     int i = 0, j = 0;
     QGraphicsLineItem* train[5];
-
-    q.prepare("select id from track_ds where status=1");
+    if(ui->lineEdit->text() == NULL)
+    {
+        q.prepare("select id from track_ds where status=1");
+        qDebug() << "select id from track_ds where status=1";
+    }
+    else
+    {
+        q.prepare(ui->lineEdit->text());
+        qDebug() << ui->lineEdit->text();
+    }
+    ui->lineEdit->clear();
     q.exec();
     qDebug() << "track status\n";
     while(q.next())
