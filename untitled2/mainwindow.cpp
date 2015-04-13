@@ -15,20 +15,29 @@
 #include <QtSql>
 #include <QMessageBox>
 #include <qmath.h>
+#include <QDesktopWidget>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-//    createDummyDatabase();
+    createDummyDatabase();
     RxTxDatabases();
     setdatabars();
 
+    QDesktopWidget desktop;
+    QRect screenSize = desktop.availableGeometry(this);
+    //this->setFixedSize(QSize(screenSize.width() * 0.9f, screenSize.height() * 0.9f));
+    this->setMaximumSize(QSize(screenSize.width(), screenSize.height()));
+    this->setMinimumSize(QSize(screenSize.width() * 0.7f, screenSize.height() * 0.7f));
 
     dbErr = new QMessageBox;
     newdb = new QDialog;
     scene = new QGraphicsScene(this);
+
+    setDB();
+
     ui->powerBox->setMaxCount(128);
     ui->powerBox->setInsertPolicy(QComboBox::InsertAtBottom);
     redPen.setColor(Qt::red);
@@ -46,16 +55,12 @@ MainWindow::MainWindow(QWidget *parent) :
     pointpurple.setColor("purple");
     pointpurple.setWidth(50);
 
-    //QPen  beacon(Qt::blue);
-    beacon = new QPen(Qt::blue);
-    beacon->setWidth(20);
     path1.setWidth(6);
 //    QPixmap pix("C://Users/Elaine/Downloads/CoordExtrap.jpg");
 //    scene->addPixmap(pix);
     QPixmap uah("C://Users/Jacob/Downloads/Logo2.jpg");
     ui->label_2->setPixmap(uah);
 
-    testnode = Node1;
     QBrush  paint;
     paint.setColor(Qt::blue);
     QPen clear(Qt::green);
@@ -65,37 +70,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setScene(scene);
     ui->graphicsView->setMouseTracking(true);
 
-    connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(rotateup()));
-    connect(ui->pushButton_2, SIGNAL(clicked()), this, SLOT(rotatedown()));
-    connect(ui->Zoom, SIGNAL(clicked()),this, SLOT(zoomIn()));
-    connect(ui->OutButton,SIGNAL(clicked()),this,SLOT(zoomOut()));
-
     setMouseTracking(true);
     scene->installEventFilter(this);
 
 
   //*****************************************************************************
-//     connect(ui->sendButtonTrain, SIGNAL(clicked()), this, SLOT(sendinfotrain()));
-     connect(ui->sendButtonTrack, SIGNAL(clicked()), this, SLOT(sendinfotrack()));
-     connect(ui->pushButton_3, SIGNAL(clicked()), this, SLOT(sendinfoRoutes()));
-     connect(ui->offbutton, SIGNAL(clicked()), this, SLOT(turnoffsection()));
-     connect(ui->onbutton, SIGNAL(clicked()), this, SLOT(turnonsection()));
+    connect(ui->Zoom, SIGNAL(clicked()),this, SLOT(zoomIn()));
+    connect(ui->OutButton,SIGNAL(clicked()),this,SLOT(zoomOut()));
+    connect(select, SIGNAL(clicked()), this, SLOT(selectdb()));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-void MainWindow::rotateup()
-{
-    ui->graphicsView->rotate(10);
-    //ui->graphicsView->centerOn(); pass in section number for live feed
-}
-
-void MainWindow::rotatedown()
-{
-    ui->graphicsView->rotate(-10);
 }
 
 void MainWindow::zoomIn()
@@ -120,8 +107,8 @@ bool MainWindow::eventFilter(QObject* s,QEvent* h)
            QGraphicsSceneMouseEvent* move = static_cast<QGraphicsSceneMouseEvent*>(h);
            xval = move->scenePos().toPoint().x();
            yval = move->scenePos().toPoint().y();
-           ui->pushButton_4->setText("XCoor: "+QString::number(xval));
-           ui->pushButton_5->setText("YCoor: "+QString::number(yval));
+//           ui->pushButton_4->setText("XCoor: "+QString::number(xval));
+//           ui->pushButton_5->setText("YCoor: "+QString::number(yval));
            return false;
         }
     }
@@ -146,24 +133,49 @@ void MainWindow::setdatabars()
 
 void MainWindow::setDB()
 {
-    newdb->setGeometry(600,300,200,200);
-    QLabel* choiceLabel = new QLabel("Please select version");
-    QComboBox* localORnetwork = new QComboBox();
-    QPushButton* select = new QPushButton("Continue");
-    QVBoxLayout* dbSelectLayout = new QVBoxLayout(newdb);
-
+    newdb->setGeometry(600,300,150,150);
+    newdb->setWindowTitle("Database Selection");
+    choiceLabel = new QLabel("Please select version");
+    localORnetwork = new QComboBox();
+    select = new QPushButton("Continue");
+    dbSelectLayout = new QVBoxLayout(newdb);
     localORnetwork->insertItem(1, "Local");
     localORnetwork->insertItem(2, "Network");
 
     dbSelectLayout->addWidget(choiceLabel);
+    dbSelectLayout->setAlignment(choiceLabel, Qt::AlignHCenter);
     dbSelectLayout->addWidget(localORnetwork);
     dbSelectLayout->addWidget(select);
     newdb->show();
-    //need to integrate both versions of program
-    //need to assign connect functions in here for which dbs to use
 }
 
 //*************SQL INTERACTION***************************************************
+
+void MainWindow::selectdb()
+{
+
+    choice = localORnetwork->currentText();
+    if(choice == "Network")
+    {
+        connect(ui->sendButtonTrack, SIGNAL(clicked()), this, SLOT(sendinfotrack()));
+        connect(ui->sendButtonTrain, SIGNAL(clicked()), this, SLOT(sendinfotrain()));
+        connect(ui->pushButton_3, SIGNAL(clicked()), this, SLOT(sendinfoRoutes()));
+        connect(ui->offbutton, SIGNAL(clicked()), this, SLOT(turnoffsection()));
+        connect(ui->onbutton, SIGNAL(clicked()), this, SLOT(turnonsection()));
+        ui->lineEdit->hide();
+    }
+    else if(choice == "Local")
+    {
+        connect(ui->sendButtonTrack, SIGNAL(clicked()), this, SLOT(sendinfotrackDUM()));
+        connect(ui->pushButton_3, SIGNAL(clicked()), this, SLOT(sendinfoRoutes()));
+        connect(ui->sendButtonTrain, SIGNAL(clicked()), this, SLOT(sendinfotrainDUM()));
+        ui->powerBox->hide();
+        ui->onbutton->hide();
+        ui->offbutton->hide();
+    }
+    newdb->close();
+}
+
 
 void MainWindow::RxTxDatabases()
 {
@@ -202,9 +214,9 @@ void MainWindow::sendinfotrack()
 {
     QSqlDatabase team4db = QSqlDatabase::addDatabase("QMYSQL");
     team4db.setHostName("pavelow.eng.uah.edu");
-    team4db.setPort(33158);
-    team4db.setPassword("drabroig");
-    team4db.setUserName("team4b");
+    team4db.setPort(33152);
+    team4db.setPassword("tfeebreq");
+    team4db.setUserName("team3a");
     team4db.setDatabaseName("team4b");
     if(!team4db.open())
     {
@@ -215,9 +227,9 @@ void MainWindow::sendinfotrack()
     }
 
     QSqlQuery q;
-    int i = 0, p = 0, j = 0, m = 0;    //testing variables
-    q.prepare("show tables where tables_in_team4b LIKE 'DS_%' && tables_in_team4b NOT LIKE '%_Connectivity'");
-    q.exec("show tables where tables_in_team4b LIKE 'DS_%' && tables_in_team4b NOT LIKE '%_Connectivity'");
+    int i = 0, p = 0, j = 0, m = 0;    //looping variables
+    q.prepare("show tables where tables_in_team4b NOT LIKE '%_Connectivity'");
+    q.exec("show tables where tables_in_team4b NOT LIKE '%_Connectivity'");
     qDebug() << "tables names\n";
     while(q.next())
     {
@@ -242,16 +254,15 @@ void MainWindow::sendinfotrack()
 
         while(q.next())
         {
-            point[j].x = q.value(0).toInt() * 10; //scale factor
-            point[j].y = q.value(1).toInt() * 10;
+            point[j].x = q.value(0).toInt() * 5; //scale factor
+            point[j].y = q.value(1).toInt() * 5;
             point[j].dsname = DS[p];
             j++;
         }
         //Determine train display points
-        int jay = floor(j/2);
-        midpoint[p].setX(point[jay].x);
-        midpoint[p].setY(point[jay].y);
-        scene->addLine( midpoint[p].x(), midpoint[p].y(),midpoint[p].x(),midpoint[p].y(), bluePen);
+        int t = floor((j-m)/2);
+        midpoint[p].setX(point[t + m].x);
+        midpoint[p].setY(point[t + m].y);
 
         for(int k = m; k < j -1; k++)
         {
@@ -260,12 +271,13 @@ void MainWindow::sendinfotrack()
             if(p == 1) lines[k]->setPen(redPen);
             else lines[k]->setPen(greenPen);
             lines[k]->setToolTip(DS[p]);    //Display on the graphic scene
-            DSections[p]->addToGroup(lines[k]); // group items together to identify them better for coloring on or off
+            DSections[p]->addToGroup(lines[k]); // group items together to identify them for coloring on or off
         }
         scene->addItem(DSections[p]);
 
         m = j;
     }
+
 
 //****************************Show powered off sections********************
  /*   q.exec("select Block from team2 where Power = 0");
@@ -281,6 +293,51 @@ void MainWindow::sendinfotrack()
     ui->lineEdit->clear();
 }
 
+void MainWindow::sendinfotrain()
+{
+
+    QSqlDatabase t4adb = QSqlDatabase::addDatabase("QMYSQL");
+    t4adb.setHostName("pavelow.eng.uah.edu");
+    t4adb.setPort(33152);
+    t4adb.setPassword("tfeebreq");
+    t4adb.setUserName("team3a");
+    t4adb.setDatabaseName("cpe453");
+    if(!t4adb.open())
+    {
+        qDebug() << "Error: " << t4adb.lastError() << endl;
+        dbErr->setWindowTitle("Warning!");
+        dbErr->setText("Database Open Error: t4adb");
+        dbErr->show();
+        //need to add option for connecting to database - qmenu item?
+    }
+
+
+
+    QSqlQuery q;
+    int i = 0, j = 0;
+    QGraphicsLineItem* train[5];
+
+    q.prepare("select id from track_ds where status=1");
+    q.exec();
+    qDebug() << "track status\n";
+    while(q.next())
+    {
+        qDebug() << q.value(0).toString();
+        for(i = 0; i < 128; i++)
+        {
+            if(DS[i] == ("DS_" + q.value(0).toString()))
+            {
+                train[j] = new QGraphicsLineItem;
+                train[j]->setToolTip("Engine " + j);
+                train[j]->setLine(midpoint[i].x(), midpoint[i].y(), midpoint[i].x(), midpoint[i].y());
+                train[j]->setPen(bluePen);
+                scene->addItem(train[j]);
+                j++;
+                continue;
+            }
+        }
+    }
+}
 
 //Use for team 2 integration
 //Only need a deactivate function because when
@@ -288,17 +345,19 @@ void MainWindow::sendinfotrack()
 //it redraws the track each 2 seconds. If it's still turned
 //off, then it will re-enter this function and set opacity
 //back to display that the piece of track is off
+//Table name: track_power
 void MainWindow::deactivate(QString section)
 {
     for(int i = 0; i < 128; i++)
     {
         if(DS[i] == section)
         {
-            DSections[i]->setOpacity(0.1);
+            DSections[i]->setOpacity(0.2);
         }
     }
     scene->update();
 }
+
 
 //Manually turn off and on a section of track from
 //a combo box of displayed sections
@@ -310,12 +369,13 @@ void MainWindow::turnoffsection()
         {
             if(DS[i] == ui->powerBox->currentText())
             {
-                DSections[i]->setOpacity(0.1);
+                DSections[i]->setOpacity(0.2);
             }
         }
         scene->update();
     }
 }
+
 void MainWindow::turnonsection()
 {
     if(ui->powerBox->count() > 0)
@@ -334,6 +394,7 @@ void MainWindow::turnonsection()
 //************manual DATA**********************************************************
 
 
+
 void MainWindow::sendinfotrainDUM()
 {
     QSqlQuery q;
@@ -343,12 +404,14 @@ void MainWindow::sendinfotrainDUM()
         QString defaultcommand = "select train,xpos,ypos from dummytrain natural join loco where train<>0";
         q.exec(defaultcommand);
         qDebug() << "default select: " << defaultcommand << endl;
+        statusLabel->setText(defaultcommand);
     }
     else
     {
         q.prepare(ui->lineEdit->text());
         q.exec(ui->lineEdit->text());
         qDebug() << ui->lineEdit->text();
+        statusLabel->setText(ui->lineEdit->text());
     }
     int i = 0;
     const int numTrains = 5;
@@ -580,3 +643,4 @@ void MainWindow::sendinfoRoutes()
     l[56] = scene->addLine(163,850,392,611,bpen);
 
 }
+

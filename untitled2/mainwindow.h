@@ -15,6 +15,7 @@
 #include <QBoxLayout>
 #include <QLineEdit>
 #include <QSql>
+#include <QComboBox>
 namespace Ui {
 class MainWindow;
 }
@@ -52,17 +53,16 @@ private:
     QGraphicsLineItem *Node3 = NULL;
     QMessageBox* dbErr;
     QDialog* newdb;
-    QGraphicsLineItem* myline[100000] = {NULL};
      QGraphicsLineItem* lines[100000] = {NULL};
 
-    QTimer* timer;
-    QTimer* testtimer;
-    QPen * beacon;
+     QLabel* choiceLabel;
+     QComboBox* localORnetwork;
+     QPushButton* select;
+     QVBoxLayout* dbSelectLayout;
 
     QPen pointyellow;
     QPen pointblue;
     QPen pointpurple;
-    QGraphicsLineItem * testnode;
 
     bool eventFilter(QObject *, QEvent*);
 
@@ -82,13 +82,11 @@ private:
       QPen greenPen;
       QPoint midpoint[128];
 
-
+    QString choice;
 
 
 
 public slots:
-    void rotateup();
-    void rotatedown();
     void zoomIn();
     void zoomOut();
     void sendinfotrainDUM();
@@ -100,10 +98,12 @@ public slots:
     void setdatabars();
     void RxTxDatabases();
     void setDB();
+    void selectdb();
 
     void turnoffsection();
     void turnonsection();
     void deactivate(QString section);
+    void sendinfotrain();
 signals:
 
 };
