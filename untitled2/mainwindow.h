@@ -52,7 +52,8 @@ private:
     QGraphicsLineItem *Node2 = NULL;
     QGraphicsLineItem *Node3 = NULL;
     QMessageBox* dbErr;
-    QDialog* newdb;
+    QMessageBox* workingdialog;
+    QDialog* setVersion;
      QGraphicsLineItem* lines[100000] = {NULL};
 
      QLabel* choiceLabel;
@@ -76,10 +77,12 @@ private:
           QString dsname;
           int x;
           int y;
+          QString SDirection;
       } point[50000];
       QPen redPen;
       QPen bluePen;
       QPen greenPen;
+      QPen blackPen;
       QPoint midpoint[128];
 
     QString choice;
@@ -95,7 +98,7 @@ public slots:
     void sendinfotrack();
     void sendinfoRoutes();
     void createDummyDatabase();
-    void setdatabars();
+    void setmenubar();
     void RxTxDatabases();
 
     void setDBdialog();
@@ -105,6 +108,13 @@ public slots:
     void turnonsection();
     void deactivate(QString section);
     void sendinfotrain();
+
+    void loadDataTable();
+    void loadDataTable2();
+    void loadDataTable3();
+    void loadDataTable4();
+    void loadDataTable5();
+    void setLegendsandLogos();
 
 signals:
 

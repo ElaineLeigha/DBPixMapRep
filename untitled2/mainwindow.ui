@@ -148,8 +148,8 @@ max-height: 13px;
  }</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_3">
-    <item>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="minimumSize">
        <size>
@@ -164,7 +164,7 @@ max-height: 13px;
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_5">
        <attribute name="title">
@@ -207,82 +207,86 @@ max-height: 13px;
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_6">
+      <widget class="QWidget" name="Engine1Path">
        <attribute name="title">
-        <string>Table</string>
+        <string>Page</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0" rowspan="2" colspan="2">
-         <widget class="QTableWidget" name="tableWidget">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QTableView" name="tableView"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="databutton1">
+          <property name="text">
+           <string>Load Data</string>
           </property>
-          <property name="sizeIncrement">
-           <size>
-            <width>90</width>
-            <height>0</height>
-           </size>
-          </property>
-          <attribute name="horizontalHeaderDefaultSectionSize">
-           <number>300</number>
-          </attribute>
-          <attribute name="verticalHeaderDefaultSectionSize">
-           <number>100</number>
-          </attribute>
-          <row>
-           <property name="text">
-            <string>Section 1</string>
-           </property>
-          </row>
-          <row>
-           <property name="text">
-            <string>Section 2</string>
-           </property>
-          </row>
-          <row>
-           <property name="text">
-            <string>Section 2</string>
-           </property>
-          </row>
-          <row>
-           <property name="text">
-            <string>Section 3</string>
-           </property>
-          </row>
-          <row>
-           <property name="text">
-            <string>Section 5</string>
-           </property>
-          </row>
-          <column>
-           <property name="text">
-            <string>Active Track Sections</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Schedule Match</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Future Schueled Sections</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Previous Active Sections</string>
-           </property>
-          </column>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLabel" name="label">
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Page</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="1" column="0">
+         <widget class="QPushButton" name="databutton2">
           <property name="text">
-           <string/>
+           <string>Load Data</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QTableView" name="tableView_2"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_3">
+       <attribute name="title">
+        <string>Page</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="0" column="0">
+         <widget class="QTableView" name="tableView_3"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="databutton3">
+          <property name="text">
+           <string>Load Data</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_4">
+       <attribute name="title">
+        <string>Page</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="0">
+         <widget class="QTableView" name="tableView_4"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="databutton4">
+          <property name="text">
+           <string>Load Data</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_7">
+       <attribute name="title">
+        <string>Page</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_8">
+        <item row="0" column="0">
+         <widget class="QTableView" name="tableView_5"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="databutton5">
+          <property name="text">
+           <string>Load Data</string>
           </property>
          </widget>
         </item>
@@ -290,9 +294,9 @@ max-height: 13px;
       </widget>
      </widget>
     </item>
-    <item>
+    <item row="0" column="1">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0" colspan="2">
+      <item row="6" column="0" colspan="3">
        <spacer name="verticalSpacer_3">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -312,10 +316,10 @@ max-height: 13px;
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="2">
+      <item row="8" column="0" colspan="3">
        <layout class="QHBoxLayout" name="horizontalLayout_2"/>
       </item>
-      <item row="2" column="0" colspan="2">
+      <item row="7" column="0" colspan="3">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <spacer name="verticalSpacer">
@@ -363,7 +367,7 @@ max-height: 13px;
         </item>
        </layout>
       </item>
-      <item row="6" column="0" colspan="2">
+      <item row="11" column="0" colspan="3">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QPushButton" name="sendButtonTrain">
@@ -427,10 +431,115 @@ max-height: 13px;
         </item>
        </layout>
       </item>
-      <item row="5" column="0" colspan="2">
+      <item row="10" column="0" colspan="3">
        <widget class="QPushButton" name="pushButton_3">
         <property name="text">
          <string>Send Routes</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="small_train_5">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="action2">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="small_train_3">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="action1">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="small_train_1">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="small_train_4">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="small_train_2">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QPushButton" name="scheduleStatus4">
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="action3">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="scheduleStatus3">
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="action4">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QPushButton" name="scheduleStatus5">
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLabel" name="action5">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="scheduleStatus2">
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="scheduleStatus1">
+        <property name="text">
+         <string>PushButton</string>
         </property>
        </widget>
       </item>
