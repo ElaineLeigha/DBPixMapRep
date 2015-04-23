@@ -347,7 +347,6 @@ void MainWindow::sendinfotrack()
         q.prepare("select X,Y,Node from " + DS.at(p)); //one table at a time
         q.exec();
         qDebug() << "default select: " << "select X,Y from " << DS.at(p) << endl;
-//        DS.at(p) = DS.at(p).replace(1,1,"_");
         while(q.next())
         {
             point[j].x = q.value(0).toInt() *4; //scale factor
@@ -386,8 +385,6 @@ void MainWindow::sendinfotrack()
             {
                 lines[k]->setLine(point[k].x, point[k].y, point[k+1].x, point[k+1].y);
             }
-            //while(point[k].SDirection == "C" && point[k].dsname == DS.at(p))
-
             lines[k]->setPen(blackPen);
             if(p == 1) lines[k]->setPen(redPen);
             else lines[k]->setPen(blackPen);
@@ -621,6 +618,7 @@ void MainWindow::sendinfotrainDUM()
         ui->lineEdit->clear();
 }
 
+
 void MainWindow::sendinfotrackDUM()
 {
     zoomOut();
@@ -654,6 +652,7 @@ void MainWindow::sendinfotrackDUM()
        scene->update();
        ui->lineEdit->clear();
 }
+
 
 void MainWindow::createDummyDatabase()
 {

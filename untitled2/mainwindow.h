@@ -16,6 +16,9 @@
 #include <QLineEdit>
 #include <QSql>
 #include <QComboBox>
+#include <QVector>
+#include <QSqlDatabase>
+
 namespace Ui {
 class MainWindow;
 }
@@ -54,12 +57,12 @@ private:
     QMessageBox* dbErr;
     QMessageBox* workingdialog;
     QDialog* setVersion;
-     QGraphicsLineItem* lines[100000] = {NULL};
+    QGraphicsLineItem* lines[100000] = {NULL};
 
-     QLabel* choiceLabel;
-     QComboBox* StandaloneORInteroperability;
-     QPushButton* select;
-     QVBoxLayout* dbSelectLayout;
+    QLabel* choiceLabel;
+    QComboBox* StandaloneORInteroperability;
+    QPushButton* select;
+    QVBoxLayout* dbSelectLayout;
 
     QPen pointyellow;
     QPen pointblue;
@@ -68,24 +71,26 @@ private:
     bool eventFilter(QObject *, QEvent*);
 
     //SQL Members
-      QGraphicsLineItem *l[400];
+    QGraphicsLineItem *l[400];
 
-      QString DS[128] = {NULL};
-      QGraphicsItemGroup * DSections[128];
+    QVector<QString> DS;
+    QGraphicsItemGroup * DSections[128];
 
-      struct XY{
-          QString dsname;
-          int x;
-          int y;
-          QString SDirection;
-      } point[50000];
-      QPen redPen;
-      QPen bluePen;
-      QPen greenPen;
-      QPen blackPen;
-      QPoint midpoint[128];
+    struct XY{
+      QString dsname;
+      int x;
+      int y;
+      QString SDirection;
+    } point[50000];
+    QPen redPen;
+    QPen bluePen;
+    QPen greenPen;
+    QPen blackPen;
+    QPoint midpoint[128];
 
     QString choice;
+    QTimer* powertimer;
+    QSqlDatabase t4adb, team4db;
 
 
 
@@ -106,8 +111,9 @@ public slots:
 
     void turnoffsection();
     void turnonsection();
-    void deactivate(QString section);
-    void sendinfotrain();
+    void deactivate(QString section, bool power);
+    void sendinfotrain(QSqlDatabase t4adb);
+
 
     void loadDataTable();
     void loadDataTable2();
@@ -115,6 +121,7 @@ public slots:
     void loadDataTable4();
     void loadDataTable5();
     void setLegendsandLogos();
+    void starttimer();
 
 signals:
 
