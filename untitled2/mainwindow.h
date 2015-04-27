@@ -55,7 +55,7 @@ private:
     QGraphicsLineItem *Node2 = NULL;
     QGraphicsLineItem *Node3 = NULL;
     QMessageBox* dbErr;
-    QMessageBox* workingdialog;
+    QDialog* workingdialog;
     QDialog* setVersion;
     QGraphicsLineItem* lines[100000] = {NULL};
 
@@ -90,21 +90,19 @@ private:
 
     QString choice;
     QTimer* powertimer;
-    QSqlDatabase t4adb, team4db;
 
-
+    QSqlDatabase powerdb, traindb, trackdb, path1, path2, path3, path4, path5;
 
 public slots:
     void zoomIn();
     void zoomOut();
-    void sendinfotrainDUM();
-    void sendinfotrackDUM();
+//    void sendinfotrainDUM();
+//    void sendinfotrackDUM();
 //    void sendinfotrain();
     void sendinfotrack();
-    void sendinfoRoutes();
-    void createDummyDatabase();
+//    void sendinfoRoutes();
+//    void createDummyDatabase();
     void setmenubar();
-    void RxTxDatabases();
 
     void setDBdialog();
     void selectdb();
@@ -112,7 +110,7 @@ public slots:
     void turnoffsection();
     void turnonsection();
     void deactivate(QString section, bool power);
-    void sendinfotrain(QSqlDatabase t4adb);
+    void sendinfotrain();
 
 
     void loadDataTable();
@@ -122,6 +120,8 @@ public slots:
     void loadDataTable5();
     void setLegendsandLogos();
     void starttimer();
+    void standalonedbs();
+    void interopdbs();
 
 signals:
 

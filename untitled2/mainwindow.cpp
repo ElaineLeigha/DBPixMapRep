@@ -24,28 +24,30 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     //Modify MainWindow: Size, Title, setting
     this->setWindowOpacity(0.0);
-    this->setWindowTitle("CPE 453 - Team 3A Display");
+    this->setWindowTitle("CPE 453 - Team 3A Display" + choice);
     QDesktopWidget desktop;
     QRect screenSize = desktop.screenGeometry(this); //retrieve working machine screensize
-    this->setMaximumSize(QSize(screenSize.width(), screenSize.height()));
+    this->setMaximumSize(QSize(screenSize.width() *0.9f, screenSize.height()*0.9f));
     this->setMinimumSize(QSize(screenSize.width() * 0.5f, screenSize.height() * 0.5f));
 
     ui->tabWidget->setTabEnabled(0,true);   //Set the Map tab as the first shown tab
 
 
-    createDummyDatabase();
+    //createDummyDatabase();
     setmenubar();
 
-    workingdialog = new QMessageBox;    //Display that the program is working
+    workingdialog = new QDialog;    //Display that the program is working
     workingdialog->setWindowTitle("In Progress");
+    workingdialog->setGeometry(300,300, 200,100);
+
     dbErr = new QMessageBox;    //Error dialog for database connection error
+    dbErr->setWindowTitle("WARNING - PROGRAM EXITING!!");
     scene = new QGraphicsScene(this);
 
     setVersion = new QDialog;    //create new dialog display database selection
     setVersion->setModal(true);
     setDBdialog();
 
-    workingdialog->removeButton(workingdialog->escapeButton());
 
     ui->powerBox->setMaxCount(128); //maximum of 128 detection sections
     ui->powerBox->setInsertPolicy(QComboBox::InsertAtBottom);
@@ -64,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     //Pen and colors for Standalone
-    QPen  path1(Qt::black);
+    QPen  path(Qt::black);
     pointblue.setColor("blue");
     pointblue.setWidth(50);
     pointyellow.setColor("yellow");
@@ -72,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
     pointpurple.setColor("purple");
     pointpurple.setWidth(50);
 
-    path1.setWidth(6);
+    path.setWidth(6);
 //    QPixmap pix("C://Users/Elaine/Downloads/CoordExtrap.jpg");
 //    scene->addPixmap(pix);
     QPixmap uah("C://Users/Jacob/Downloads/Logo2.jpg");
@@ -96,6 +98,33 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setTabText(4, "Engine 4 Path");
     ui->tabWidget->setTabText(5, "Engine 5 Path");
 
+    powerdb = QSqlDatabase::addDatabase("QMYSQL","pdb");
+    powerdb.setHostName("pavelow.eng.uah.edu");
+    powerdb.setDatabaseName("cpe453");
+    traindb = QSqlDatabase::addDatabase("QMYSQL","traindb");
+    traindb.setHostName("pavelow.eng.uah.edu");
+    traindb.setDatabaseName("cpe453");
+    trackdb = QSqlDatabase::addDatabase("QMYSQL","trackdb");
+    trackdb.setHostName("pavelow.eng.uah.edu");
+    trackdb.setUserName("root");
+    trackdb.setDatabaseName("LocoLayout");
+    path1 = QSqlDatabase::addDatabase("QMYSQL", "path1");
+    path1.setHostName("pavelow.eng.uah.edu");
+    path1.setDatabaseName("cpe453");
+    path2 = QSqlDatabase::addDatabase("QMYSQL", "path2");
+    path2.setHostName("pavelow.eng.uah.edu");
+    path2.setDatabaseName("cpe453");
+    path3 = QSqlDatabase::addDatabase("QMYSQL", "path3");
+    path3.setHostName("pavelow.eng.uah.edu");
+    path3.setDatabaseName("cpe453");
+    path4 = QSqlDatabase::addDatabase("QMYSQL", "path4");
+    path4.setHostName("pavelow.eng.uah.edu");
+    path4.setDatabaseName("cpe453");
+    path5 = QSqlDatabase::addDatabase("QMYSQL", "path5");
+    path5.setHostName("pavelow.eng.uah.edu");
+    path5.setDatabaseName("cpe453");
+
+
     zoomIn();
     zoomIn();
     zoomIn();
@@ -114,7 +143,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->Zoom, SIGNAL(clicked()),this, SLOT(zoomIn()));
     connect(ui->OutButton,SIGNAL(clicked()),this,SLOT(zoomOut()));
     connect(select, SIGNAL(clicked()), this, SLOT(selectdb()));
-//    DS = new QVector;
+
 }
 
 MainWindow::~MainWindow()
@@ -124,23 +153,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::starttimer()
 {
+        statusLabel->setText(choice + " Last Update: " + QTime::currentTime().toString());
 
     //****************************Show powered off sections********************
+        QSqlQuery two("select ds,state from track_power", powerdb);
 
-        QSqlDatabase teamdb = QSqlDatabase::addDatabase("QMYSQL");
-        teamdb.setHostName("pavelow.eng.uah.edu");
-        teamdb.setPort(33153);
-        teamdb.setPassword("tfeebreq");
-        teamdb.setUserName("team3a");
-        teamdb.setDatabaseName("cpe453");
-        if(!teamdb.open())
-        {
-            qDebug() << "Error: " << teamdb.lastError() << endl;
-            dbErr->setText("Database Error: teamdb");
-            dbErr->show();
-        }
-        QSqlQuery two;
-        two.prepare("select ds,state from track_power");
         two.exec();
         while(two.next())
         {
@@ -149,18 +166,207 @@ void MainWindow::starttimer()
              section = section.replace(1,1,"_");
              deactivate(section, power);
         }
-        sendinfotrain(t4adb);
+        sendinfotrain();
 }
+
+
+void MainWindow::standalonedbs()
+{
+    powerdb.setUserName("team3a");
+    powerdb.setPort(33152);
+    powerdb.setPassword("tfeebreq");
+    if(!powerdb.open())
+    {
+        qDebug() << "Error: " << powerdb.lastError() << endl;
+        dbErr->setText("Database Error: power - 3A");
+        dbErr->show();
+        this->close();
+    }
+
+    traindb.setUserName("team3a");
+    traindb.setPort(33152);
+    traindb.setPassword("tfeebreq");
+    if(!traindb.open())
+    {
+        qDebug() << "Error: " << traindb.lastError() << endl;
+        dbErr->setText("Database Error: train - 3A");
+        dbErr->show();
+        this->close();
+    }
+
+    trackdb.setUserName("team3a");
+    trackdb.setPort(33152);
+    trackdb.setPassword("tfeebreq");
+    if(!trackdb.open())
+    {
+        qDebug() << "Error: " << trackdb.lastError() << endl;
+        dbErr->setText("Database Error: track - 3A");
+        dbErr->show();
+        this->close();
+    }
+
+    path1.setUserName("team3a");
+    path1.setPort(33152);
+    path1.setPassword("tfeebreq");
+    if(!path1.open())
+    {
+        qDebug() << "Error: " << path1.lastError() << endl;
+        dbErr->setText("Database Error: path1 - 3A");
+        dbErr->show();
+        this->close();
+    }
+    path2.setUserName("team3a");
+    path2.setPort(33152);
+    path2.setPassword("tfeebreq");
+    if(!path2.open())
+    {
+        qDebug() << "Error: " << path2.lastError() << endl;
+        dbErr->setText("Database Error: path2 - 3A");
+        dbErr->show();
+        this->close();
+    }
+
+    path3.setUserName("team3a");
+    path3.setPort(33152);
+    path3.setPassword("tfeebreq");
+    if(!path3.open())
+    {
+        qDebug() << "Error: " << path3.lastError() << endl;
+        dbErr->setText("Database Error: path3 - 3A");
+        dbErr->show();
+        this->close();
+    }
+
+    path4.setUserName("team3a");
+    path4.setPort(33152);
+    path4.setPassword("tfeebreq");
+    if(!path4.open())
+    {
+        qDebug() << "Error: " << path4.lastError() << endl;
+        dbErr->setText("Database Error: path4 - 3A");
+        dbErr->show();
+        this->close();
+    }
+
+    path5.setUserName("team3a");
+    path5.setPort(33152);
+    path5.setPassword("tfeebreq");
+    if(!path5.open())
+    {
+        qDebug() << "Error: " << path5.lastError() << endl;
+        dbErr->setText("Database Error: path5 - 3A");
+        dbErr->show();
+        this->close();
+    }
+}
+
+
+
+void MainWindow::interopdbs()
+{
+    powerdb.setUserName("team3a");
+    powerdb.setPort(33153);
+    powerdb.setPassword("tfeebreq");
+    if(!powerdb.open())
+    {
+        qDebug() << "Error: " << powerdb.lastError() << endl;
+        dbErr->setText("Database Error: power - 4A");
+        dbErr->show();
+        this->close();
+    }
+
+
+    traindb.setUserName("team3a");
+    traindb.setPort(33153);
+    traindb.setPassword("tfeebreq");
+    if(!traindb.open())
+    {
+        qDebug() << "Error: " << traindb.lastError() << endl;
+        dbErr->setText("Database Error: train - 4A");
+        dbErr->show();
+        this->close();
+    }
+
+    trackdb.setPort(33158);
+    trackdb.setPassword("drabroig");
+    if(!trackdb.open())
+    {
+        qDebug() << "Error: " << trackdb.lastError() << endl;
+        dbErr->setText("Database Error: track - 4B");
+        dbErr->show();
+        this->close();
+    }
+
+
+    path1.setUserName("team3a");
+    path1.setPort(33153);
+    path1.setPassword("tfeebreq");
+    if(!path1.open())
+    {
+        qDebug() << "Error: " << path1.lastError() << endl;
+        dbErr->setText("Database Error: Path1 - 4A");
+        dbErr->show();
+        this->close();
+    }
+
+
+    path2.setUserName("team3a");
+    path2.setPort(33153);
+    path2.setPassword("tfeebreq");
+    if(!path2.open())
+    {
+        qDebug() << "Error: " << path2.lastError() << endl;
+        dbErr->setText("Database Error: path2 - 4A");
+        dbErr->show();
+        this->close();
+    }
+    path3.setUserName("team3a");
+    path3.setPort(33153);
+    path3.setPassword("tfeebreq");
+    if(!path3.open())
+    {
+        qDebug() << "Error: " << path3.lastError() << endl;
+        dbErr->setText("Database Error: path3 - 4A");
+        dbErr->show();
+        this->close();
+    }
+    path4.setUserName("team3a");
+    path4.setPort(33153);
+    path4.setPassword("tfeebreq");
+    if(!path4.open())
+    {
+        qDebug() << "Error: " << path4.lastError() << endl;
+        dbErr->setText("Database Error: path4 - 4A");
+        dbErr->show();
+        this->close();
+    }
+    path5.setUserName("team3a");
+    path5.setPort(33153);
+    path5.setPassword("tfeebreq");
+    if(!path5.open())
+    {
+        qDebug() << "Error: " << path5.lastError() << endl;
+        dbErr->setText("Database Error: path5 - 4A");
+        dbErr->show();
+        this->close();
+    }
+}
+
+
 
 void MainWindow::zoomIn()
 {
     ui->graphicsView->scale(1.1,1.1);
 }
 
+
+
 void MainWindow::zoomOut()
 {
     ui->graphicsView->scale(.8,.8);
 }
+
+
 
 bool MainWindow::eventFilter(QObject* s,QEvent* h)
 {
@@ -183,20 +389,23 @@ bool MainWindow::eventFilter(QObject* s,QEvent* h)
     return false;
 }
 
+
+
 void MainWindow::setmenubar()
 {
     statusLabel = new QLabel("Ready");  //This changes when the dummy base is in use that something has been updated manually
     statusBar()->addWidget(statusLabel);
 
     quit = new QAction("Quit", this);
-    dbselect = new QAction("DB Configuration", this);
+    //dbselect = new QAction("DB Configuration", this);
     filemenu = menuBar()->addMenu("File");
-    optionsmenu = menuBar()->addMenu("Options");
+    //optionsmenu = menuBar()->addMenu("Options");
     filemenu->addAction(quit);
-    optionsmenu->addAction(dbselect);
+    //optionsmenu->addAction(dbselect);
     connect(quit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(dbselect, SIGNAL(triggered()), this, SLOT(setDBdialog()));
+    //connect(dbselect, SIGNAL(triggered()), this, SLOT(setDBdialog()));
 }
+
 
 void MainWindow::setDBdialog()
 {
@@ -221,107 +430,57 @@ void MainWindow::setDBdialog()
 void MainWindow::selectdb()
 {
     choice = StandaloneORInteroperability->currentText();
-    if(choice == "Interoperability")
+
+
+    connect(ui->sendButtonTrack, SIGNAL(clicked()), this, SLOT(sendinfotrack()));
+    connect(ui->sendButtonTrain, SIGNAL(clicked()), this, SLOT(sendinfotrain()));
+    connect(ui->offbutton, SIGNAL(clicked()), this, SLOT(turnoffsection()));
+    connect(ui->onbutton, SIGNAL(clicked()), this, SLOT(turnonsection()));
+    connect(ui->databutton1,SIGNAL(clicked()),this, SLOT(loadDataTable()));
+    connect(ui->databutton2,SIGNAL(clicked()),this, SLOT(loadDataTable2()));
+    connect(ui->databutton3,SIGNAL(clicked()),this, SLOT(loadDataTable3()));
+    connect(ui->databutton4,SIGNAL(clicked()),this, SLOT(loadDataTable4()));
+    connect(ui->databutton5,SIGNAL(clicked()),this, SLOT(loadDataTable5()));
+    if(choice == "Interoperability") //choose what to show in the dialog based on
     {
-        t4adb = QSqlDatabase::addDatabase("QMYSQL");
-        t4adb.setHostName("pavelow.eng.uah.edu");
-        t4adb.setPort(33153);
-        t4adb.setPassword("tfeebreq");
-        t4adb.setUserName("team3a");
-        t4adb.setDatabaseName("cpe453");
-        if(!t4adb.open())
-        {
-            qDebug() << "Error: " << t4adb.lastError() << endl;
-            dbErr->setWindowTitle("Warning!");
-            dbErr->setText("Database Open Error: t4adb");
-            dbErr->show();
-            //need to add option for connecting to database - qmenu item?
-        }
-
-
-
-
-
-        connect(ui->sendButtonTrack, SIGNAL(clicked()), this, SLOT(sendinfotrack()));
-        connect(ui->sendButtonTrain, SIGNAL(clicked()), this, SLOT(sendinfotrain(t4adb)));
-        connect(ui->offbutton, SIGNAL(clicked()), this, SLOT(turnoffsection()));
-        connect(ui->onbutton, SIGNAL(clicked()), this, SLOT(turnonsection()));
         ui->pushButton_3->hide();
+        interopdbs();
     }
     else if(choice == "Standalone")
     {
-        connect(ui->sendButtonTrack, SIGNAL(clicked()), this, SLOT(sendinfotrackDUM()));
-        connect(ui->pushButton_3, SIGNAL(clicked()), this, SLOT(sendinfoRoutes()));
-        connect(ui->sendButtonTrain, SIGNAL(clicked()), this, SLOT(sendinfotrainDUM()));
-        connect(ui->databutton1,SIGNAL(clicked()),this, SLOT(loadDataTable()));
-        connect(ui->databutton2,SIGNAL(clicked()),this, SLOT(loadDataTable2()));
-        connect(ui->databutton3,SIGNAL(clicked()),this, SLOT(loadDataTable3()));
-        connect(ui->databutton4,SIGNAL(clicked()),this, SLOT(loadDataTable4()));
-        connect(ui->databutton5,SIGNAL(clicked()),this, SLOT(loadDataTable5()));
-
         ui->powerBox->hide();
         ui->onbutton->hide();
         ui->offbutton->hide();
-
-
-
+        standalonedbs();
     }
+    ui->sendButtonTrain->hide();
+    ui->sendButtonTrack->hide();
+    ui->powerBox->hide();
+    ui->offbutton->hide();
+    ui->onbutton->hide();
+    ui->lineEdit->hide();
     setLegendsandLogos();
     this->setWindowOpacity(1.0);
     setVersion->close();
+    sendinfotrack();
 }
 
-void MainWindow::RxTxDatabases()
-{
-    //    team 150 oaldehay team 1a
-    //    team 151 ralcarox team 2a
-    //    team 152 tfeebreq team 3a
-    //    team 153 cstrapwi team 4a
-    //    team 154 aiablydy team 5a
-    //    team 155 rychakkn team 1b
-    //    team 156 neicarev team 2b
-    //    team 157 ulimbese team 3b
-    //    team 158 drabroig team 4b
-    //    mysql --protocol=tcp -P 33152 --user=root --password=tfeebreq
-
-    QSqlDatabase team3db = QSqlDatabase::addDatabase("QMYSQL","3db");
-    team3db.setHostName("pavelow.eng.uah.edu");
-    team3db.setPort(33152);
-    team3db.setPassword("tfeebreq");
-    team3db.setUserName("team3a");
-    team3db.setDatabaseName("test");
-    if(!team3db.open())
-    {
-        qDebug() << "Error: " << team3db.lastError() << endl;
-        dbErr->setText("Database Error: team3db");
-        dbErr->show();
-        //need to add option for connecting to database - qmenu item?
-    }
-}
 
 //Reads from team 4 DS tables and draw
 //Assigns ds names to each block of track
 //Will need to add team 1 info to associate colors
 //of predicted path.
+
 void MainWindow::sendinfotrack()
 {
-    DS.clear();
-    QSqlDatabase team4db = QSqlDatabase::addDatabase("QMYSQL");
-    team4db.setHostName("pavelow.eng.uah.edu");
-    team4db.setPort(33158);
-    team4db.setPassword("drabroig");
-    team4db.setUserName("root");
-    team4db.setDatabaseName("LocoLayout");
-    if(!team4db.open())
-    {
-        qDebug() << "Error: " << team4db.lastError() << endl;
-        dbErr->setText("Database Error: team4db");
-        dbErr->show();
-    }
+    powertimer->stop();
+    statusLabel->setText("Last Update: " + QTime::currentTime().toString());
 
-    QSqlQuery q;
+
+    DS.clear();
     int i = 0, p = 0, j = 0, m = 0, val;    //looping variables
-    q.prepare("show tables where tables_in_LocoLayout");
+    QSqlQuery q("show tables where tables_in_LocoLayout", trackdb);
+
     q.exec();
     qDebug() << "tables names\n";
     while(q.next())
@@ -338,16 +497,18 @@ void MainWindow::sendinfotrack()
         i++;
     }
     scene->clear();
-
+workingdialog->setModal(true);
+workingdialog->show();
 
     for(p = 0; p < i; p ++)// i at this point is the number of detection sections available
     {
+
         QApplication::processEvents();
+        statusLabel->setText(choice + " Last Update: " + QTime::currentTime().toString());
         DSections[p] = new QGraphicsItemGroup;
         q.prepare("select X,Y,Node from " + DS.at(p)); //one table at a time
         q.exec();
         qDebug() << "default select: " << "select X,Y from " << DS.at(p) << endl;
-//        DS.at(p) = DS.at(p).replace(1,1,"_");
         while(q.next())
         {
             point[j].x = q.value(0).toInt() *4; //scale factor
@@ -386,11 +547,8 @@ void MainWindow::sendinfotrack()
             {
                 lines[k]->setLine(point[k].x, point[k].y, point[k+1].x, point[k+1].y);
             }
-            //while(point[k].SDirection == "C" && point[k].dsname == DS.at(p))
-
             lines[k]->setPen(blackPen);
-            if(p == 1) lines[k]->setPen(redPen);
-            else lines[k]->setPen(blackPen);
+//            if(p == 1) lines[k]->setPen(redPen);
             lines[k]->setToolTip(DS.at(p));    //Display on the graphic scene
             DSections[p]->addToGroup(lines[k]); // group items together to identify them for coloring on or off
         }
@@ -402,50 +560,42 @@ void MainWindow::sendinfotrack()
     scene->update();
     ui->lineEdit->clear();
     powertimer->start();
+    workingdialog->close();
+    workingdialog->setModal(false);
 }
 
-
-void MainWindow::sendinfotrain(QSqlDatabase t4adb)
+void MainWindow::sendinfotrain()
 {
-    QSqlQuery q;
+    QSqlQuery q("select id from track_ds where status=1",traindb);
     int i = 0, j = 0;
     QGraphicsLineItem* train[DS.size()];
-    if(ui->lineEdit->text() == NULL)
-    {
-        q.prepare("select id from track_ds where status=1");
-        qDebug() << "select id from track_ds where status=1";
-    }
-    else
-    {
-        q.prepare(ui->lineEdit->text());
-        qDebug() << ui->lineEdit->text();
-    }
+        //qDebug() << "select id from track_ds where status=1";
+
+
     ui->lineEdit->clear();
     q.exec();
-    qDebug() << "track status\n";
+    //qDebug() << "track status\n";
     while(q.next())
     {
         QString position = q.value(0).toString().replace(1,1,"_");
-        qDebug() << position << endl;
+        //qDebug() << position << endl;
         for(i = 0; i < DS.size(); i++)
         {
-            train[j] = new QGraphicsLineItem;
+            train[i] = new QGraphicsLineItem;
+            train[i]->setLine(midpoint[i].x(), midpoint[i].y(), midpoint[i].x(), midpoint[i].y());
+            train[i]->setPen(bluePen);
+            scene->addItem(train[i]);
             if(DS.at(i) == position)
             {
-                train[j]->setLine(midpoint[i].x(), midpoint[i].y(), midpoint[i].x(), midpoint[i].y());
-                train[j]->setOpacity(1.0);
-                train[j]->setPen(bluePen);
-                scene->addItem(train[j]);
+                train[i]->setOpacity(1.0);
             }
             else
             {
-                train[j]->setOpacity(0.0);
+                train[i]->setOpacity(0.0);
             }
-            j++;
         }
     }
 }
-
 
 void MainWindow::setLegendsandLogos()
 {
@@ -495,7 +645,6 @@ void MainWindow::setLegendsandLogos()
             ui->scheduleStatus5->setStyleSheet("background: qlineargradient(x1 : 0, y1 : 0, x2 : 0, y2 :   1, stop :   0.0 #c0dbff, stop :   0.5 #FA8258, stop :   0.55 #FA8258, stop :   1.0 #c0dbff)");
 }
 
-
 //Use for team 2 integration
 //Only need a deactivate function because when
 //put on a timer and constantly reading from the database
@@ -503,6 +652,7 @@ void MainWindow::setLegendsandLogos()
 //off, then it will re-enter this function and set opacity
 //back to display that the piece of track is off
 //Table name: track_power
+
 
 void MainWindow::deactivate(QString section,bool power)
 {
@@ -520,40 +670,12 @@ void MainWindow::deactivate(QString section,bool power)
     scene->update();
 }
 
+
 //Manually turn off and on a section of track from
 //a combo box of displayed sections
-void MainWindow::turnoffsection()
-{
-    if(ui->powerBox->count() > 0)
-    {
-        for(int i = 0; i < DS.size(); i++)
-        {
-            if(DS.at(i) == ui->powerBox->currentText())
-            {
-                DSections[i]->setOpacity(0.2);
-            }
-        }
-        scene->update();
-    }
-}
-
-void MainWindow::turnonsection()
-{
-    if(ui->powerBox->count() > 0)
-    {
-        for(int i = 0; i < DS.size(); i++)
-        {
-            if(DS.at(i) == ui->powerBox->currentText())
-            {
-                DSections[i]->setOpacity(1.0);
-            }
-        }
-        scene->update();
-    }
-}
 
 //************manual DATA**********************************************************
-
+/*
 void MainWindow::sendinfotrainDUM()
 {
     QSqlQuery q;
@@ -621,6 +743,7 @@ void MainWindow::sendinfotrainDUM()
         ui->lineEdit->clear();
 }
 
+
 void MainWindow::sendinfotrackDUM()
 {
     zoomOut();
@@ -654,6 +777,7 @@ void MainWindow::sendinfotrackDUM()
        scene->update();
        ui->lineEdit->clear();
 }
+
 
 void MainWindow::createDummyDatabase()
 {
@@ -903,14 +1027,44 @@ void MainWindow::sendinfoRoutes()
       //("C:/Users/telem_000/Desktop/sprint4code/untitled2/train3_symbol.png");
     //  train->setPos(163,1028);
 }
+*/
 
+void MainWindow::turnoffsection()
+{
+    if(ui->powerBox->count() > 0)
+    {
+        for(int i = 0; i < DS.size(); i++)
+        {
+            if(DS.at(i) == ui->powerBox->currentText())
+            {
+                DSections[i]->setOpacity(0.2);
+            }
+        }
+        scene->update();
+    }
+}
+
+
+void MainWindow::turnonsection()
+{
+    if(ui->powerBox->count() > 0)
+    {
+        for(int i = 0; i < DS.size(); i++)
+        {
+            if(DS.at(i) == ui->powerBox->currentText())
+            {
+                DSections[i]->setOpacity(1.0);
+            }
+        }
+        scene->update();
+    }
+}
 
 
 void MainWindow::loadDataTable()
 {
     QSqlQueryModel *model = new QSqlQueryModel();
-    QSqlQuery q2;
-    q2.prepare("select * from schedule ");
+    QSqlQuery q2("select * from Eng1Path", path1);
     q2.exec();
     model->setQuery(q2);
     ui->tableView->setModel(model);
@@ -927,11 +1081,12 @@ void MainWindow::loadDataTable()
 
 }
 
+
+
 void MainWindow::loadDataTable2()
 {
     QSqlQueryModel *model = new QSqlQueryModel();
-    QSqlQuery q2;
-    q2.prepare("select * from schedule2 ");
+    QSqlQuery q2("select * from Eng2Path", path2);
     q2.exec();
     model->setQuery(q2);
     ui->tableView_2->setModel(model);
@@ -951,8 +1106,7 @@ void MainWindow::loadDataTable2()
 void MainWindow::loadDataTable3()
 {
     QSqlQueryModel *model = new QSqlQueryModel();
-    QSqlQuery q2;
-    q2.prepare("select * from schedule3 ");
+    QSqlQuery q2("select * from Eng3Path", path3);
     q2.exec();
     model->setQuery(q2);
     ui->tableView_3->setModel(model);
@@ -972,8 +1126,7 @@ void MainWindow::loadDataTable3()
 void MainWindow::loadDataTable4()
 {
     QSqlQueryModel *model = new QSqlQueryModel();
-    QSqlQuery q2;
-    q2.prepare("select * from schedule4 ");
+    QSqlQuery q2("select * from Eng4Path", path4);
     q2.exec();
     model->setQuery(q2);
     ui->tableView_4->setModel(model);
@@ -993,8 +1146,7 @@ void MainWindow::loadDataTable4()
 void MainWindow::loadDataTable5()
 {
     QSqlQueryModel *model = new QSqlQueryModel();
-    QSqlQuery q2;
-    q2.prepare("select * from schedule5 ");
+    QSqlQuery q2("select * from Eng5Path", path5);
     q2.exec();
     model->setQuery(q2);
     ui->tableView_5->setModel(model);
